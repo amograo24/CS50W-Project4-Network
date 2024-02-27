@@ -1,0 +1,95 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <div style="display: grid; grid-template-columns: 100%;">
+        {% for post in page_obj %}
+            <div style="margin-top: 2%; margin-left: 2%; margin-right: 2%; border: 1px solid gray; padding: 2%; border-radius: 3px;">
+                <h5><a href="{% url 'profile' post.poster %}">{{post.poster}}</a></h5> 
+                <p>{{post.post_content}}</p> 
+                <p>{{post.date}}</p> 
+            <!-- </div> -->
+                <div>
+                    {% if request.user in post.likes.all %}
+                        <!-- unlike -->
+                        <button style="background-color: transparent; border: none; outline: none;" data-like_status="0" onclick="sendRequest(this.id,this.getAttribute('data-like_status'))" id="{{post.id}}" class="like_button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16" style="color: red;">
+                            <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/></svg>
+                        </button>
+                    {% else %}
+                        <!-- like -->
+                        <button style="background-color: transparent; border: none; outline: none;" data-like_status="1" onclick="sendRequest(this.id,this.getAttribute('data-like_status'))" id="{{post.id}}" class="like_button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16" style="color: red;">
+                            <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/></svg>
+                        </button>
+                    {% endif %}
+                    <span id="likecount{{post.id}}">{{ post.likes.all.count }}</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <nav style="margin-left: 2%; margin-top: 2%;" aria-label="...">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{page_obj.previous_page_number}}">Previous</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                </li>
+            {% endif %}
+          <!-- <li class="page-item"><a class="page-link" href="#">1</a></li> -->
+          <li class="page-item active" aria-current="page">
+            <a class="page-link" href="?page={{page_obj.number}}">{{page_obj.number}}<span class="sr-only"></span></a>
+          </li>
+            {% if page_obj.has_next %}
+          <!-- <li class="page-item"><a class="page-link" href="#">3</a></li> -->
+            <li class="page-item">
+                <a class="page-link" href="?page={{page_obj.next_page_number}}">Next</a>
+            </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    <script>
+        function sendRequest(id,like_status) {
+            button=document.getElementById(`${id}`)
+            like_count_of_button=document.getElementById(`likecount${id}`)
+            // like_status=parseInt(like_status)
+            fetch(`/apis/like_unlike/${id}`, {
+                method:"POST",
+                body:JSON.stringify({
+                    like_status:like_status
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                if (data['like_status']==="1") {
+                    // console.log(data['like_status'])
+                    //button.dataset.like_status="0"
+                    button.setAttribute("data-like_status","1")
+                    // button.innerHTML="Like"
+                    button.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16" style="color: red;"><path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/></svg>'
+                    like_count_of_button.innerHTML--
+                    //document.querySelector('span').innerHTML--
+                    // console.log(button.innerHTML)
+                    // console.log(data['like_status'])
+                } else {
+                    button.setAttribute("data-like_status","0")
+                    like_count_of_button.innerHTML++
+                    //button.innerHTML="Unlike"
+                    button.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16" style="color: red;"><path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/></svg>'
+                    // console.log(button.innerHTML)
+                    // console.log(data['like_status'])
+                    // console.log(data['like_status'])
+                    //button.dataset.like_status="1"
+
+                }
+                console.log(button.dataset)
+                //}   // console.log(data['like_status'])
+            })
+        }
+    </script>
+{% endblock %}

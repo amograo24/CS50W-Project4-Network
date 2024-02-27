@@ -1,0 +1,21 @@
+.button_blue {
+    background-color: rgb(45, 129, 238);
+    border-radius: 6px;
+    border-color: rgb(45, 129, 238);
+    border: 0;
+    padding: 6px;
+    color: white;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#id_post_content {
+    height: 5em;
+    width: 100%;
+}
+
+label {
+    width: 100%;
+    font-weight: 500;
+    font-size: xx-large;
+}
